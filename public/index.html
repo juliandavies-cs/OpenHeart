@@ -7,55 +7,108 @@
     body {
       font-family: Arial, sans-serif;
       background: #f0f8ff;
-      text-align: center;
+      margin: 0;
       padding: 50px;
       min-height: 100vh;
-      margin: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      max-width: 900px;
+      gap: 40px;
+    }
+
+    .left-side {
+      flex: 1;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .left-side p {
+      margin: 0;
+      font-size: 18px;
     }
 
     input[type="text"] {
       padding: 10px;
-      width: 300px;
+      width: 100%;
+      max-width: 300px;
       font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
 
     button {
       padding: 10px 20px;
       font-size: 16px;
-      margin-left: 10px;
+      margin-right: 10px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s ease;
     }
 
-    .card {
-      position: fixed; /* take out of normal flow */
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px;
-      background: #ffffff;
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .right-side {
+      flex: 1;
+      background: #fff;
+      padding: 20px 25px;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      display: none; /* hidden initially */
-      z-index: 1000; /* above other content */
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #outputMessage {
+      width: 100%;
+      font-size: 16px;
+      border-radius: 8px;
+      padding: 10px;
+      resize: vertical;
+      min-height: 150px;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
   <h1>💌 OpenHeart Cards</h1>
-  <p>Enter what's going on, and get an AI-generated "get well soon" message.</p>
 
-  <input type="text" id="userInput" placeholder="e.g. likes, dislikes, message structure" />
-  <button onclick="generateMessage()">Generate</button>
+  <div class="container">
+    <div class="left-side">
+      <p>Enter what's going on, and get an AI-generated "get well soon" message.</p>
+      <input type="text" id="userInput" placeholder="e.g. likes, dislikes, message structure" />
+      <div>
+        <button onclick="generateMessage()">Generate</button>
+        <button onclick="downloadPDF()">Download as PDF</button>
+      </div>
+    </div>
 
-  <div class="card" id="outputCard">
-    <h2>Your Message:</h2>
-    <p id="outputMessage"></p>
+    <div class="right-side" id="outputCard">
+      <h2>Your Message:</h2>
+      <textarea id="outputMessage" rows="6" placeholder="Your message will appear here..."></textarea>
+    </div>
   </div>
+
+  <!-- jsPDF CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
     async function generateMessage() {
@@ -64,8 +117,8 @@
       const card = document.getElementById("outputCard");
 
       if (!input.trim()) {
-        output.textContent = "Please enter a description.";
-        card.style.display = "block";
+        output.value = "Please enter a description.";
+        card.style.display = "flex";
         return;
       }
 
@@ -79,14 +132,37 @@
         });
 
         const data = await res.json();
-        console.log(data.message)
-        output.textContent = data.message || "No message generated.";
+        output.value = data.message || "No message generated.";
       } catch (err) {
-        output.textContent = "An error occurred. Please try again.";
+        output.value = "An error occurred. Please try again.";
         console.error(err);
       }
 
-      card.style.display = "block";
+      card.style.display = "flex";
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const message = document.getElementById("outputMessage").value.trim();
+
+      if (!message) {
+        alert("Please generate a message first.");
+        return;
+      }
+
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4"
+      });
+
+      // Inside message (right half)
+      doc.setFontSize(12);
+      doc.text(doc.splitTextToSize(message, 120), 220, 70, {
+        align: 'center'
+      });
+
+      doc.save("openheart-card.pdf");
     }
   </script>
 </body>

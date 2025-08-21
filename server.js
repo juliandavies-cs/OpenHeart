@@ -43,7 +43,7 @@ app.post('/generate', async (req, res) => {
       messages: [
         {
           role: "system",
-          content: `You are a "get well soon" card writer. Based on the user's description, generate a short, warm, and friendly get-well message. Do not exceed 250 characters.`
+          content: `You are a "get well soon" card writer. Based on the user's description, generate a short, warm, and friendly get-well message. Do not exceed 250 characters and no emojis.`
         },
         {
           role: "user",
