@@ -89,6 +89,7 @@
       resize: vertical;
       min-height: 150px;
       box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
   </style>
 </head>
@@ -145,6 +146,7 @@
       card.style.display = "flex";
     }
 
+    let counter = localStorage.getItem("pdfCounter") || 0;
     async function downloadPDF() {
       const { jsPDF } = window.jspdf;
       const message = document.getElementById("outputMessage").value.trim();
@@ -166,7 +168,9 @@
         align: 'center'
       });
 
-      doc.save("openheart-card.pdf");
+      doc.save(`openheart-card-${counter}.pdf`);
+      counter++;
+      localStorage.setItem("pdfCounter", counter);
     }
   </script>
 </body>
